@@ -10,11 +10,11 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 The training data for this project are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
 The test data are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
-##https://www.google.nl/search?client=safari&rls=en&q=acknowledgement&ie=UTF-8&oe=UTF-8&gfe_rd=cr&ei=TgvXVeXmO4Pu8wfipqqwBw
+##Acknowledgement
 The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. 
 
 First downloading and loading the data into "r"
-```{r, cache = TRUE}
+```{r}
 setwd("~/Documents/Rstudio")
 if(!file.exists("data")){
         dir.create("data")
@@ -33,7 +33,7 @@ FinalTest <- read.csv("./data/testing.csv")
 ```
 
 Loading the required packages
-```{r, cache=TRUE}
+```{r, message=FALSE}
 library(caret)
 library(ggplot2)
 require(plyr)
@@ -44,7 +44,7 @@ library(randomForest)
 ##Data clean-up 
 Since building a model on variables with no values is useless, let's delete those first. Then replace the leftover NA with the value zero. since a lot of variables contain a lot of NA's which are now replaced with zero, there mean is also zero lets delete those variables as well. Also lets subset on the new_window="no" since our 20test cases are only containing no. At last delete the first 7 columns of dataset, because this data has notting to do with measurements and classe determination.
 
-```{r, cache=TRUE}
+```{r}
 ## delete rows with only NA values
 dat <- Data[,colSums(is.na(Data))<nrow(Data)]
 
@@ -63,7 +63,7 @@ dat1 <- dat[,-c(1:7)]
 
 ##Cross-validation
 for the cross-validation we need to split the trainingset in a training and test set. This is done with the createDataPartition with a 60% of the data going into the trainingset.
-```{r, cache=TRUE}
+```{r}
 set.seed(1234)
 inTrain <- createDataPartition(y=dat1$classe, p =0.6, list=FALSE)
 training <- dat1[inTrain,]
@@ -71,20 +71,20 @@ testing <- dat1[-inTrain,]
 ```
 
 Lets build our model. The used method is randomforest and the model is trained on all the left variables after the sample clean-up.
-```{r, cache=TRUE}
+```{r}
 modFit <- train(classe ~. , data =training, method="rf", prox = TRUE)
 ```
 
 ##performance of the model
 first lets view the model and see how it is predicting the class of the testing dataset
 
-```{r, cache=TRUE}
-modelFit
+```{r}
+modFit
 pred <- predict(modFit, testing)
 confusionMatrix(pred, testing$classe)
 ```
 
-**The out of sample error on this model is `r 1-0,9928` (1 minus Accuracy)**
+**The out of sample error on this model is `r 1-0.9928` (1 minus Accuracy)**
 
 The sensitivity of the model for classe 
 *A = 99.8% 
@@ -102,7 +102,7 @@ The specificity of the model for classe
 
 ##Prediction assignment
 The model is now used to determine the classe of the 20 test cases.
-```{r, cache=TRUE}
+```{r}
 FinalTest[is.na(FinalTest)] <- 0
 predFinal <- predict(modFit, FinalTest)
 predFinal
